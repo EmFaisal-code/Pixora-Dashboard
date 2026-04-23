@@ -1,0 +1,43 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('events', function (Blueprint $table) {
+            // Fields for news & announcements and strategic programs
+            $table->enum('type', ['news', 'program'])->default('news')->after('status');
+            $table->enum('category', ['kerjasama', 'akademik', 'budaya', 'pelajar', 'promosi', 'strategik', 'other'])->nullable()->after('type');
+            $table->text('content')->nullable()->after('description'); // Rich text content
+            $table->time('time')->nullable()->after('date');
+            $table->decimal('duration', 4, 2)->nullable()->after('time'); // Duration in hours
+            $table->integer('capacity')->nullable()->after('duration');
+            $table->string('registration_link')->nullable()->after('capacity');
+            $table->string('tags')->nullable()->after('registration_link');
+            $table->boolean('featured')->default(false)->after('tags');
+            $table->timestamp('publish_date')->nullable()->after('featured');
+            $table->enum('publish_status', ['draft', 'published', 'archived'])->default('draft')->after('publish_date');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('events', function (Blueprint $table) {
+            $table->dropColumn([
+                'type', 'category', 'content', 'time', 'duration', 
+                'capacity', 'registration_link', 'tags', 'featured', 
+                'publish_date', 'publish_status'
+            ]);
+        });
+    }
+};
