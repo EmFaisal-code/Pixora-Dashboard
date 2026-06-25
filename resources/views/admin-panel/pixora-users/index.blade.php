@@ -65,7 +65,11 @@
                                     @if($user['is_banned'] ?? false)
                                         <span class="badge badge-danger"><i class="fas fa-ban mr-1"></i>Banned</span>
                                     @else
-                                        <span class="badge badge-success"><i class="fas fa-check mr-1"></i>Aktif</span>
+                                        @if(isset($user['last_seen']) && \Carbon\Carbon::parse($user['last_seen'])->diffInMinutes() < 10)
+                                            <span class="badge badge-success"><i class="fas fa-circle mr-1" style="font-size: 8px; vertical-align: middle;"></i>Online</span>
+                                        @else
+                                            <span class="badge badge-secondary"><i class="fas fa-circle mr-1" style="font-size: 8px; vertical-align: middle;"></i>Offline</span>
+                                        @endif
                                     @endif
                                 </td>
                                 <td>
