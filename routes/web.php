@@ -29,7 +29,6 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     // Pixora Users
     Route::get('/pixora-users', [PixoraUserController::class, 'index'])->name('pixora-users');
-    Route::post('/pixora-users/{username}/reset-password', [PixoraUserController::class, 'resetPassword'])->name('pixora-users.reset-password');
     Route::post('/pixora-users/{username}/toggle-ban', [PixoraUserController::class, 'toggleBan'])->name('pixora-users.toggle-ban');
     Route::delete('/pixora-users/{username}', [PixoraUserController::class, 'destroy'])->name('pixora-users.delete');
 

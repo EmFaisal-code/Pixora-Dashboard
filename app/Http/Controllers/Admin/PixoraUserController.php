@@ -34,22 +34,6 @@ class PixoraUserController extends Controller
         return view('admin-panel.pixora-users.index', compact('users', 'minVersion'));
     }
 
-    public function resetPassword(Request $request, $username)
-    {
-        $request->validate(['password' => 'required|min:4']);
-
-        $hashed = hash('sha256', $request->password);
-
-        Http::withHeaders($this->headers())
-            ->patch($this->supaUrl . '?username=eq.' . urlencode($username), [
-                'password'        => $hashed,
-                'reset_requested' => false,
-                'updated_at'      => now()->toISOString(),
-            ]);
-
-        return back()->with('success', "Password untuk {$username} berhasil direset.");
-    }
-
     public function toggleBan($username)
     {
         // Ambil status ban saat ini
