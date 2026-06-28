@@ -86,11 +86,46 @@ class PixoraVersionController extends Controller
         ]);
 
         $status = !$current ? 'diizinkan' : 'diblokir';
+        
+        // Auto-update latest_version if needed (e.g. if we blocked the latest version)
+        $this->updateLatestVersionIfNeeded();
+        
         return back()->with('success', "Versi v{$version} berhasil {$status}.");
     }
 
     public function destroy($version) {
         Http::withHeaders($this->headers())->delete($this->supaVersions . '?version=eq.' . $version);
+        
+        // Auto-update latest_version if we deleted the current latest version
+        $this->updateLatestVersionIfNeeded();
+        
         return back()->with('success', "Versi v{$version} dihapus.");
+    }
+
+    /**
+     * Automatically evaluate the highest allowed version and sync it to pixora_config.
+     */
+    private function updateLatestVersionIfNeeded() {
+        $res = Http::withHeaders($this->headers())->get($this->supaVersions . '?allowed=eq.true&select=version');
+        $versions = $res->successful() ? $res->json() : [];
+        
+        if (empty($versions)) {
+            return; // Nothing to do if no versions allowed
+        }
+
+        // Sort descending using semver
+        usort($versions, function($a, $b) {
+            return version_compare($b['version'], $a['version']);
+        });
+
+        $highest = $versions[0]['version'];
+
+        // Update the config with the highest remaining allowed version
+        Http::withHeaders($this->headers(['Prefer' => 'resolution=merge-duplicates,return=minimal']))
+            ->post($this->supaConfig . '?on_conflict=key', [
+                'key'        => 'latest_version',
+                'value'      => $highest,
+                'updated_at' => now()->toISOString(),
+            ]);
     }
 }
