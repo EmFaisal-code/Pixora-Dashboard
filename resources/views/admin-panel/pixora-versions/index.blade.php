@@ -73,7 +73,7 @@
                 <small class="text-muted d-block mb-1">Latest Version:</small>
                 <span class="badge badge-primary">v{{ $currentConfig['latest_version'] ?? 'belum diset' }}</span>
                 <small class="text-muted d-block mt-2 mb-1">Update Message:</small>
-                <p class="text-sm mb-0" style="font-size:11px;line-height:1.5;white-space:pre-line;">{{ $currentConfig['update_message'] ?: '(kosong)' }}</p>
+                <p class="text-sm mb-0" style="font-size:11px;line-height:1.5;white-space:pre-line;">{{ !empty($currentConfig['update_message']) ? $currentConfig['update_message'] : '(kosong)' }}</p>
             </div>
         </div>
     </div>
