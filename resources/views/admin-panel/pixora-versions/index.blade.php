@@ -8,6 +8,7 @@
 
 @section('content')
 <div class="row">
+    {{-- ── Left: Add Version Form ── --}}
     <div class="col-md-4">
         <div class="card">
             <div class="card-header"><h3 class="card-title"><i class="fas fa-plus mr-2"></i>Tambah Versi</h3></div>
@@ -18,27 +19,66 @@
                         {{ session('success') }}
                     </div>
                 @endif
+
                 <form method="POST" action="{{ route('admin.pixora-versions.store') }}">
                     @csrf
+
+                    {{-- Version Number --}}
                     <div class="form-group">
-                        <label>Nomor Versi</label>
-                        <input type="text" name="version" class="form-control" placeholder="e.g. 1.2.0" required>
+                        <label class="font-weight-bold">Nomor Versi</label>
+                        <input type="text" name="version" class="form-control" placeholder="e.g. 2.5.0" required>
                         <small class="text-muted">Format: major.minor.patch</small>
                     </div>
+
+                    {{-- Allow toggle --}}
                     <div class="form-group">
                         <div class="custom-control custom-switch">
                             <input type="checkbox" class="custom-control-input" id="allowedCheck" name="allowed" value="1" checked>
                             <label class="custom-control-label" for="allowedCheck">Izinkan versi ini</label>
                         </div>
                     </div>
+
+                    {{-- Set as latest toggle --}}
+                    <div class="form-group">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="latestCheck" name="set_as_latest" value="1" checked>
+                            <label class="custom-control-label" for="latestCheck">
+                                Jadikan sebagai <strong>Latest Version</strong>
+                                <br><small class="text-muted">Tampilkan popup update opsional ke user lama</small>
+                            </label>
+                        </div>
+                    </div>
+
+                    {{-- Update Message --}}
+                    <div class="form-group">
+                        <label class="font-weight-bold">📝 Pesan Update (What's New)</label>
+                        <textarea name="update_message" class="form-control" rows="4"
+                            placeholder="Tulis catatan rilis di sini...&#10;Contoh:&#10;- Perbaikan deteksi CAPTCHA&#10;- Peningkatan kecepatan upload">{{ $currentConfig['update_message'] ?? '' }}</textarea>
+                        <small class="text-muted">Pesan ini akan muncul di popup update opsional pada ekstensi user. Kosongkan jika tidak ada perubahan.</small>
+                    </div>
+
                     <button type="submit" class="btn btn-primary btn-block">
                         <i class="fas fa-plus mr-1"></i> Tambah Versi
                     </button>
                 </form>
             </div>
         </div>
+
+        {{-- Current Config Summary --}}
+        <div class="card mt-3">
+            <div class="card-header bg-light">
+                <h3 class="card-title" style="font-size:13px;"><i class="fas fa-info-circle mr-2 text-primary"></i>Konfigurasi Aktif Saat Ini</h3>
+            </div>
+            <div class="card-body p-3">
+                <small class="text-muted d-block mb-1">Latest Version:</small>
+                <span class="badge badge-primary">v{{ $currentConfig['latest_version'] ?? 'belum diset' }}</span>
+                <small class="text-muted d-block mt-2 mb-1">Update Message:</small>
+                <p class="text-sm mb-0" style="font-size:11px;line-height:1.5;white-space:pre-line;">{{ $currentConfig['update_message'] ?: '(kosong)' }}</p>
+            </div>
+        </div>
     </div>
 
+    {{-- ── Right: Version List ── --}}
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">

@@ -8,10 +8,10 @@
 
 @section('content')
 <div class="row justify-content-center">
-    <div class="col-md-6">
+    <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-sliders-h mr-2"></i>Remote Feature Toggle</h3>
+                <h3 class="card-title"><i class="fas fa-sliders-h mr-2"></i>Remote Feature Toggle & Config</h3>
             </div>
             <div class="card-body">
                 @if(session('success'))
@@ -19,32 +19,35 @@
                 @endif
 
                 @foreach($configs as $config)
-                @if($config['key'] === 'min_version')
+                
+                @if(in_array($config['key'], ['min_version', 'latest_version', 'update_message', 'announcement', 'download_url']))
                 <div class="py-3 border-bottom">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <div>
-                            <div class="font-weight-bold">🔄 Force Update — Minimum Version</div>
-                            <small class="text-muted">User dengan versi <strong>lebih rendah</strong> dari ini akan dipaksa update dan tidak bisa menggunakan extension.</small>
-                        </div>
+                    <div class="font-weight-bold mb-2">
+                        @if($config['key'] === 'min_version') 🛑 Force Update — Minimum Version
+                        @elseif($config['key'] === 'latest_version') 🆕 Latest Version (Optional Update)
+                        @elseif($config['key'] === 'update_message') 📝 Update Message (What's New)
+                        @elseif($config['key'] === 'announcement') 📢 Global Announcement Banner
+                        @elseif($config['key'] === 'download_url') 🔗 Download URL
+                        @endif
                     </div>
-                    <form method="POST" action="{{ route('admin.pixora-config.set-version') }}" class="d-flex align-items-center" style="gap:8px;">
+                    <form method="POST" action="{{ route('admin.pixora-config.set-value', $config['key']) }}" class="d-flex align-items-center" style="gap:8px;">
                         @csrf
-                        <div class="input-group" style="max-width:260px;">
+                        <div class="input-group" style="width:100%;">
                             <div class="input-group-prepend">
-                                <span class="input-group-text">Min. Version</span>
+                                <span class="input-group-text">{{ $config['key'] }}</span>
                             </div>
-                            <input type="text" name="version" value="{{ $config['value'] ?? '1.0.0' }}"
-                                class="form-control" placeholder="e.g. 1.2.0">
+                            @if(in_array($config['key'], ['update_message', 'announcement']))
+                                <textarea name="value" class="form-control" rows="2">{{ $config['value'] ?? '' }}</textarea>
+                            @else
+                                <input type="text" name="value" value="{{ $config['value'] ?? '' }}" class="form-control">
+                            @endif
                             <div class="input-group-append">
-                                <button type="submit" class="btn btn-warning"
-                                    onclick="return confirm('Set minimum version ke {{ $config['value'] ?? '1.0.0' }}? User dengan versi lebih lama tidak bisa menggunakan extension.')">
-                                    <i class="fas fa-save mr-1"></i> Set
-                                </button>
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i> Save</button>
                             </div>
                         </div>
-                        <small class="text-muted">Versi saat ini di extension: <strong>v1.1.1</strong></small>
                     </form>
                 </div>
+                
                 @else
                 <div class="d-flex align-items-center justify-content-between py-3 border-bottom">
                     <div>

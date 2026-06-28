@@ -42,4 +42,5 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/pixora-config', [PixoraConfigController::class, 'index'])->name('pixora-config');
     Route::post('/pixora-config/{key}/toggle', [PixoraConfigController::class, 'toggle'])->name('pixora-config.toggle');
     Route::post('/pixora-config/set-version', [PixoraConfigController::class, 'setVersion'])->name('pixora-config.set-version');
+    Route::post('/pixora-config/set-value/{key}', [PixoraConfigController::class, 'setValue'])->name('pixora-config.set-value');
 });
