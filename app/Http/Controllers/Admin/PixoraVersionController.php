@@ -57,7 +57,7 @@ class PixoraVersionController extends Controller
         // 2. If "set as latest", update pixora_config.latest_version
         if ($setAsLatest) {
             Http::withHeaders($this->headers(['Prefer' => 'resolution=merge-duplicates,return=minimal']))
-                ->post($this->supaConfig, [
+                ->post($this->supaConfig . '?on_conflict=key', [
                     'key'        => 'latest_version',
                     'value'      => $version,
                     'updated_at' => now()->toISOString(),
@@ -67,7 +67,7 @@ class PixoraVersionController extends Controller
         // 3. If update message is provided, save to pixora_config.update_message
         if ($updateMessage !== '') {
             Http::withHeaders($this->headers(['Prefer' => 'resolution=merge-duplicates,return=minimal']))
-                ->post($this->supaConfig, [
+                ->post($this->supaConfig . '?on_conflict=key', [
                     'key'        => 'update_message',
                     'value'      => $updateMessage,
                     'updated_at' => now()->toISOString(),

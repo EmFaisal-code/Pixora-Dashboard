@@ -60,7 +60,7 @@ class PixoraConfigController extends Controller
     private function seedDefaults(): void {
         Http::withHeaders($this->headers([
             'Prefer' => 'resolution=ignore-duplicates,return=minimal',
-        ]))->post($this->supaUrl, $this->defaultConfigs);
+        ]))->post($this->supaUrl . '?on_conflict=key', $this->defaultConfigs);
     }
 
     /**
@@ -74,7 +74,7 @@ class PixoraConfigController extends Controller
 
         // UPSERT with flipped enabled value
         Http::withHeaders($this->headers(['Prefer' => 'resolution=merge-duplicates,return=minimal']))
-            ->post($this->supaUrl, [
+            ->post($this->supaUrl . '?on_conflict=key', [
                 'key'        => $key,
                 'enabled'    => !$current,
                 'updated_at' => now()->toISOString(),
@@ -91,7 +91,7 @@ class PixoraConfigController extends Controller
         $value = trim($request->input('value', ''));
 
         Http::withHeaders($this->headers(['Prefer' => 'resolution=merge-duplicates,return=minimal']))
-            ->post($this->supaUrl, [
+            ->post($this->supaUrl . '?on_conflict=key', [
                 'key'        => $key,
                 'value'      => $value,
                 'updated_at' => now()->toISOString(),
