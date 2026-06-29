@@ -1,210 +1,116 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="antialiased h-full">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Login - Pixora Admin</title>
 
-    <!-- Google Font: Source Sans Pro -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- AdminLTE Theme style -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     
-    <style>
-        .login-page {
-            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
-            min-height: 100vh;
-        }
-        
-        .login-box {
-            width: 400px;
-        }
-        
-        .card {
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        .card-header {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            color: white;
-            border-radius: 15px 15px 0 0 !important;
-            text-align: center;
-            padding: 30px 20px;
-        }
-        
-        .login-logo {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-        
-        .login-subtitle {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        
-        .card-body {
-            padding: 40px 30px;
-        }
-        
-        .form-control {
-            border-radius: 25px;
-            padding: 12px 20px;
-            border: 2px solid #e9ecef;
-            transition: all 0.3s ease;
-        }
-        
-        .form-control:focus {
-            border-color: #6366f1;
-            box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
-        }
-        
-        .input-group-text {
-            border-radius: 25px 0 0 25px;
-            border: 2px solid #e9ecef;
-            border-right: none;
-            background-color: #f8f9fa;
-        }
-        
-        .input-group .form-control {
-            border-radius: 0 25px 25px 0;
-            border-left: none;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            border: none;
-            border-radius: 25px;
-            padding: 12px 30px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
-        }
-        
-        .form-check-input:checked {
-            background-color: #6366f1;
-            border-color: #6366f1;
-        }
-        
-        .text-center a {
-            color: #6366f1;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .text-center a:hover {
-            color: #8b5cf6;
-            text-decoration: underline;
-        }
-        
-        .alert {
-            border-radius: 10px;
-            border: none;
-        }
-        
-        .alert-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-    </style>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="hold-transition login-page">
-<div class="login-box">
-    <div class="card card-outline">
-        <div class="card-header">
-            <div class="login-logo">
-                <i class="fas fa-mobile-alt mr-2"></i>
-                <strong>Pixora</strong>
+<body class="h-full flex items-center justify-center bg-slate-900 font-sans selection:bg-primary-500 selection:text-white relative overflow-hidden">
+
+    <!-- Decorative blobs -->
+    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none flex items-center justify-center">
+        <div class="absolute top-[-20%] left-[-10%] w-[70vw] h-[70vw] rounded-full bg-primary-600/20 blur-[120px] mix-blend-screen"></div>
+        <div class="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-violet-600/20 blur-[120px] mix-blend-screen"></div>
+    </div>
+
+    <div class="w-full max-w-md px-6 z-10 relative">
+        <!-- Logo Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary-500 to-violet-500 shadow-xl shadow-primary-500/30 mb-5 border border-white/10">
+                <i data-lucide="smartphone" class="w-8 h-8 text-white"></i>
             </div>
-            <p class="login-subtitle">Admin Panel</p>
+            <h1 class="text-3xl font-display font-bold text-white tracking-tight mb-2">Pixora Admin</h1>
+            <p class="text-slate-400">Silakan login untuk mengelola sistem</p>
         </div>
-        <div class="card-body">
+
+        <!-- Login Card -->
+        <div class="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 p-8 rounded-3xl shadow-2xl">
             @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul class="mb-0">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+                <div class="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-200 text-sm">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="alert-circle" class="w-5 h-5 shrink-0 text-red-400 mt-0.5"></i>
+                        <ul class="list-disc list-inside space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
             @endif
 
-            <form action="{{ route('login') }}" method="post">
+            <form action="{{ route('login') }}" method="post" x-data="{ loading: false }" @submit="loading = true">
                 @csrf
                 
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">
-                            <i class="fas fa-envelope"></i>
-                        </span>
-                    </div>
-                    <input type="email" class="form-control" name="email" placeholder="Email" value="{{ old('email') }}" required>
-                </div>
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">
-                            <i class="fas fa-lock"></i>
-                        </span>
-                    </div>
-                    <input type="password" class="form-control" name="password" placeholder="Password" required>
-                </div>
-                <div class="row">
-                    <div class="col-8">
-                        <div class="icheck-primary">
-                            <input type="checkbox" id="remember" name="remember">
-                            <label for="remember">
-                                Remember Me
-                            </label>
+                <div class="space-y-5">
+                    <!-- Email -->
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-slate-300 mb-2">Alamat Email</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i data-lucide="mail" class="w-5 h-5 text-slate-500"></i>
+                            </div>
+                            <input type="email" id="email" name="email" value="{{ old('email') }}" required autofocus
+                                   class="block w-full pl-11 pr-4 py-3.5 bg-slate-900/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50 transition-all shadow-inner"
+                                   placeholder="admin@pixora.com">
                         </div>
                     </div>
-                    <div class="col-4">
-                        <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+
+                    <!-- Password -->
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-slate-300 mb-2">Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i data-lucide="lock" class="w-5 h-5 text-slate-500"></i>
+                            </div>
+                            <input type="password" id="password" name="password" required
+                                   class="block w-full pl-11 pr-4 py-3.5 bg-slate-900/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50 transition-all shadow-inner"
+                                   placeholder="••••••••">
+                        </div>
                     </div>
+
+                    <!-- Remember Me -->
+                    <div class="flex items-center pt-1">
+                        <input type="checkbox" id="remember" name="remember" class="w-4 h-4 rounded border-slate-700 bg-slate-900/50 text-primary-500 focus:ring-primary-500/50 focus:ring-offset-slate-800 transition-colors">
+                        <label for="remember" class="ml-2.5 block text-sm text-slate-300 cursor-pointer select-none">
+                            Ingat sesi saya
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" :disabled="loading"
+                            class="w-full flex items-center justify-center py-3.5 px-4 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-primary-600 to-violet-600 hover:from-primary-500 hover:to-violet-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-slate-900 shadow-lg shadow-primary-500/25 transition-all disabled:opacity-70 disabled:cursor-not-allowed group mt-2">
+                        <span x-show="!loading">Masuk ke Dashboard</span>
+                        <div x-show="loading" style="display: none;" class="flex items-center justify-center gap-2">
+                            <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
+                            <span>Mengautentikasi...</span>
+                        </div>
+                        <i data-lucide="arrow-right" x-show="!loading" class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform"></i>
+                    </button>
                 </div>
             </form>
+        </div>
 
-            <div class="text-center mt-4">
-                <div class="alert alert-info">
-                    <i class="fas fa-shield-alt"></i>
-                    <strong>Secure Admin Access</strong><br>
-                    <small>Authorized personnel only. All login attempts are monitored.</small>
-                </div>
-            </div>
+        <!-- Security Badge -->
+        <div class="mt-8 flex items-center justify-center gap-2.5 text-sm text-slate-500">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+            <span>Secure & Encrypted Connection</span>
         </div>
     </div>
-</div>
 
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- Bootstrap 4 -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-<!-- AdminLTE App -->
-<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
-
-<script>
-$(document).ready(function() {
-    // Set up CSRF token for all AJAX requests
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-    
-    // Add loading state to login button
-    $('form').on('submit', function() {
-        var $btn = $(this).find('button[type="submit"]');
-        $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Signing In...');
-    });
-});
-</script>
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+    </script>
 </body>
 </html>

@@ -7,21 +7,28 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\PixoraUserController;
 use App\Http\Controllers\Admin\PixoraConfigController;
 use App\Http\Controllers\Admin\PixoraVersionController;
+use App\Http\Controllers\Admin\DashboardApiController;
 
-// Root → redirect ke login
+// Root → redirect ke login or dashboard
 Route::get('/', function () {
+    if (Illuminate\Support\Facades\Auth::check()) {
+        return redirect()->route('admin.dashboard');
+    }
     return redirect()->route('login');
 })->name('home');
 
 // Authentication
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [LoginController::class, 'login']);
+});
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Admin routes (protected)
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/api/dashboard/stats', [DashboardApiController::class, 'stats'])->name('api.dashboard.stats');
 
     // Settings
     Route::get('/settings/password', [SettingsController::class, 'showPasswordForm'])->name('settings.password');
@@ -29,6 +36,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     // Pixora Users
     Route::get('/pixora-users', [PixoraUserController::class, 'index'])->name('pixora-users');
+    Route::post('/pixora-users/bulk-ban', [PixoraUserController::class, 'bulkBan'])->name('pixora-users.bulk-ban');
+    Route::post('/pixora-users/bulk-delete', [PixoraUserController::class, 'bulkDelete'])->name('pixora-users.bulk-delete');
     Route::post('/pixora-users/{username}/toggle-ban', [PixoraUserController::class, 'toggleBan'])->name('pixora-users.toggle-ban');
     Route::delete('/pixora-users/{username}', [PixoraUserController::class, 'destroy'])->name('pixora-users.delete');
 
