@@ -29,11 +29,10 @@ class SettingsController extends Controller
             'password' => [
                 'required', 
                 'confirmed', 
-                'min:8',
-                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/',
+                Password::min(8)->mixedCase()->numbers()->symbols(),
             ],
         ], [
-            'password.regex' => 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
+            'password' => 'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.',
         ]);
 
         // Update password with proper hashing
