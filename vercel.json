@@ -8,7 +8,8 @@
     },
     "routes": [
         {
-            "handle": "filesystem"
+            "src": "/build/(.*)",
+            "dest": "/build/$1"
         },
         {
             "src": "/(.*)",
