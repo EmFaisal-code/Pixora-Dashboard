@@ -35,11 +35,34 @@
         showDeleteModal: false,
         banReason: '',
         isProcessingBulk: false,
+        showUserPanel: false,
+        selectedUser: null,
+        isLoadingTikTok: false,
+        tiktokData: null,
         get allUsernames() {
             return Array.from(document.querySelectorAll('.row-checkbox')).map(cb => cb.value);
         },
         toggleAll(checked) {
             this.selected = checked ? this.allUsernames : [];
+        },
+        async openUserPanel(user) {
+            this.selectedUser = user;
+            this.showUserPanel = true;
+            this.tiktokData = null;
+            this.isLoadingTikTok = true;
+            
+            try {
+                const response = await fetch(`/admin/api/tiktok-profile/${user.username}`);
+                if (!response.ok) {
+                    this.tiktokData = { error: 'Profil diprivat atau tidak ditemukan' };
+                } else {
+                    this.tiktokData = await response.json();
+                }
+            } catch(e) {
+                this.tiktokData = { error: 'Terjadi kesalahan jaringan' };
+            } finally {
+                this.isLoadingTikTok = false;
+            }
         },
         async bulkDelete() {
             if (this.selected.length === 0) return;
@@ -336,6 +359,9 @@
                     </td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-2">
+                            <button @click="openUserPanel({{ json_encode($user) }})" class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-primary-600 hover:bg-primary-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            </button>
                             <form method="POST" action="{{ route('admin.pixora-users.toggle-ban', urlencode($user['username'])) }}" class="inline-block">
                                 @csrf
                                 <button type="submit" 
@@ -433,6 +459,165 @@
             </div>
         </div>
     </div>
+    
+    <!-- SLIDE OVER PANEL DETAIL PENGGUNA -->
+    <div x-show="showUserPanel" class="relative z-50" aria-labelledby="slide-over-title" role="dialog" aria-modal="true" style="display: none;">
+        <!-- Background Overlay -->
+        <div x-show="showUserPanel" 
+             x-transition:enter="ease-in-out duration-300" 
+             x-transition:enter-start="opacity-0" 
+             x-transition:enter-end="opacity-100" 
+             x-transition:leave="ease-in-out duration-300" 
+             x-transition:leave-start="opacity-100" 
+             x-transition:leave-end="opacity-0" 
+             class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" 
+             @click="showUserPanel = false"></div>
+
+        <!-- Panel Container: fixed, full-screen, no overflow-hidden ancestors -->
+        <div class="fixed inset-y-0 right-0 z-50 flex w-full max-w-md pointer-events-none sm:pl-10">
+            <!-- Panel -->
+            <div x-show="showUserPanel" 
+                 @click.outside="showUserPanel = false"
+                 x-transition:enter="transform transition ease-in-out duration-300 sm:duration-500" 
+                 x-transition:enter-start="translate-x-full" 
+                 x-transition:enter-end="translate-x-0" 
+                 x-transition:leave="transform transition ease-in-out duration-300 sm:duration-500" 
+                 x-transition:leave-start="translate-x-0" 
+                 x-transition:leave-end="translate-x-full" 
+                 class="pointer-events-auto w-full h-full">
+                <div class="grid h-full bg-white shadow-2xl border-l border-slate-200" style="grid-template-rows: auto minmax(0, 1fr) auto;">
+                    
+                    <!-- Header -->
+                    <div class="px-4 py-4 sm:px-6 sm:py-5 border-b border-slate-100 bg-slate-50/50">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold text-lg border border-primary-200 shadow-sm">
+                                    <span x-text="selectedUser ? selectedUser.username.replace('@', '').substring(0,1).toUpperCase() : ''"></span>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold text-slate-900" id="slide-over-title" x-text="selectedUser ? selectedUser.username : ''"></h2>
+                                    <div class="mt-0.5 flex items-center">
+                                        <template x-if="selectedUser?.is_banned">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-red-100 text-red-800">
+                                                <i data-lucide="shield-alert" class="w-3 h-3 mr-1"></i> Banned
+                                            </span>
+                                        </template>
+                                        <template x-if="!selectedUser?.is_banned">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-100 text-emerald-800">
+                                                <i data-lucide="check-circle" class="w-3 h-3 mr-1"></i> Active
+                                            </span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ml-3 flex h-7 items-center">
+                                <button type="button" @click="showUserPanel = false" class="rounded-lg bg-white text-slate-400 hover:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 p-1 border border-transparent hover:border-slate-200 transition-colors">
+                                    <span class="sr-only">Close panel</span>
+                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Main Content: the ONLY scrollable element -->
+                    <div class="overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5 bg-white min-h-0" style="-webkit-overflow-scrolling: touch;">
+                        
+                        <!-- Internal System Info -->
+                        <div class="mb-4">
+                            <h3 class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2 border-b border-slate-100 pb-1">Informasi Sistem (Internal)</h3>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center p-2 bg-slate-50 rounded-xl border border-slate-100">
+                                    <div class="flex items-center gap-2 text-xs text-slate-600 whitespace-nowrap">
+                                        <i data-lucide="calendar" class="w-3.5 h-3.5 shrink-0"></i> Mendaftar
+                                    </div>
+                                    <div class="text-xs font-medium text-slate-900 text-right ml-4 break-words" x-text="selectedUser?.created_at ? new Date(selectedUser.created_at).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) : '-'"></div>
+                                </div>
+                                <div class="flex justify-between items-center p-2 bg-slate-50 rounded-xl border border-slate-100">
+                                    <div class="flex items-center gap-2 text-xs text-slate-600 whitespace-nowrap">
+                                        <i data-lucide="clock" class="w-3.5 h-3.5 shrink-0"></i> Terakhir Aktif
+                                    </div>
+                                    <div class="text-xs font-medium text-slate-900 text-right ml-4 break-words" x-text="selectedUser?.last_seen ? new Date(selectedUser.last_seen).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'}) : 'Belum pernah'"></div>
+                                </div>
+                                <div class="flex justify-between items-center p-2 bg-slate-50 rounded-xl border border-slate-100">
+                                    <div class="flex items-center gap-2 text-xs text-slate-600 whitespace-nowrap">
+                                        <i data-lucide="smartphone" class="w-3.5 h-3.5 shrink-0"></i> Versi Aplikasi
+                                    </div>
+                                    <div class="text-xs font-medium text-slate-900 bg-white px-2 py-0.5 rounded shadow-sm border border-slate-200 shrink-0" x-text="selectedUser?.version_used || 'Unknown'"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- TikTok Public Info -->
+                        <div>
+                            <h3 class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2 border-b border-slate-100 pb-1 flex items-center gap-2">
+                                Informasi Publik TikTok
+                            </h3>
+                            
+                            <!-- Skeleton Loading -->
+                            <div x-show="isLoadingTikTok" class="animate-pulse space-y-2">
+                                <div class="h-16 bg-slate-100 rounded-2xl border border-slate-200"></div>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <div class="h-12 bg-slate-100 rounded-xl border border-slate-200"></div>
+                                    <div class="h-12 bg-slate-100 rounded-xl border border-slate-200"></div>
+                                    <div class="h-12 bg-slate-100 rounded-xl border border-slate-200"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Error / Private -->
+                            <div x-show="!isLoadingTikTok && tiktokData?.error" class="bg-slate-50 border border-slate-200 border-dashed rounded-xl p-4 text-center">
+                                <div class="mx-auto flex items-center justify-center h-10 w-10 rounded-full bg-slate-100 mb-2 text-slate-400">
+                                    <i data-lucide="lock" class="h-5 w-5"></i>
+                                </div>
+                                <h3 class="text-xs font-medium text-slate-900" x-text="tiktokData?.error"></h3>
+                                <p class="mt-1 text-[10px] text-slate-500">TikTok membatasi akses pada profil publik ini.</p>
+                            </div>
+                            
+                            <!-- Data Ready -->
+                            <div x-show="!isLoadingTikTok && tiktokData && !tiktokData.error">
+                                <!-- Profile Card -->
+                                <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-3 text-white shadow-lg mb-2 flex items-center gap-3 relative overflow-hidden">
+                                    <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+                                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center border border-white/30 backdrop-blur-sm z-10 shrink-0">
+                                        <i data-lucide="user" class="w-5 h-5 text-white"></i>
+                                    </div>
+                                    <div class="z-10 truncate">
+                                        <p class="text-[10px] text-slate-300 font-medium mb-0.5">Display Name</p>
+                                        <p class="text-base font-bold truncate" x-text="tiktokData?.display_name"></p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Stats Grid -->
+                                <div class="grid grid-cols-3 gap-2">
+                                    <div class="bg-white border border-slate-200 shadow-sm rounded-xl p-2 text-center transition-transform hover:-translate-y-1 hover:shadow-md">
+                                        <p class="text-[10px] font-medium text-slate-500 mb-0.5">Followers</p>
+                                        <p class="text-sm font-bold text-slate-900" x-text="tiktokData?.followers"></p>
+                                    </div>
+                                    <div class="bg-white border border-slate-200 shadow-sm rounded-xl p-2 text-center transition-transform hover:-translate-y-1 hover:shadow-md">
+                                        <p class="text-[10px] font-medium text-slate-500 mb-0.5">Following</p>
+                                        <p class="text-sm font-bold text-slate-900" x-text="tiktokData?.following"></p>
+                                    </div>
+                                    <div class="bg-white border border-slate-200 shadow-sm rounded-xl p-2 text-center transition-transform hover:-translate-y-1 hover:shadow-md">
+                                        <p class="text-[10px] font-medium text-slate-500 mb-0.5">Likes</p>
+                                        <p class="text-sm font-bold text-slate-900" x-text="tiktokData?.likes"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="border-t border-slate-100 p-4 bg-slate-50">
+                        <button type="button" @click="showUserPanel = false" class="w-full justify-center inline-flex items-center rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm border border-slate-200 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-200 transition-colors">
+                            Tutup Panel
+                        </button>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 @endsection

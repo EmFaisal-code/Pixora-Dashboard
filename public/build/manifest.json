@@ -1,0 +1,26 @@
+{
+  "node_modules/chart.js/auto/auto.js": {
+    "file": "assets/auto-CquwA8NN.js",
+    "name": "auto",
+    "src": "node_modules/chart.js/auto/auto.js",
+    "isDynamicEntry": true
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-JktETZrl.css",
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "name": "app",
+    "names": [
+      "app.css"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-BiOWNvXW.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "dynamicImports": [
+      "node_modules/chart.js/auto/auto.js"
+    ]
+  }
+}

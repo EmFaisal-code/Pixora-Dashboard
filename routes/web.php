@@ -29,6 +29,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/api/dashboard/stats', [DashboardApiController::class, 'stats'])->name('api.dashboard.stats');
+    Route::get('/api/tiktok-profile/{username}', [PixoraUserController::class, 'getTikTokProfile'])->name('api.tiktok-profile');
 
     // Settings
     Route::get('/settings/password', [SettingsController::class, 'showPasswordForm'])->name('settings.password');

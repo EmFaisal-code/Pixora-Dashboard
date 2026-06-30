@@ -150,4 +150,53 @@ class PixoraUserController extends Controller
 
         return response()->json(['success' => false, 'error' => 'Gagal menghapus pengguna: ' . $response->body()], 500);
     }
+
+    public function getTikTokProfile($username)
+    {
+        $cleanUsername = ltrim($username, '@');
+
+        $data = \Illuminate\Support\Facades\Cache::remember('tiktok_v2_' . $cleanUsername, 3600, function () use ($cleanUsername) {
+            try {
+                $response = Http::timeout(10)->get('https://www.tikwm.com/api/user/info', [
+                    'unique_id' => $cleanUsername
+                ]);
+
+                if (!$response->successful()) {
+                    return ['error' => 'Gagal terhubung ke layanan data', 'is_private' => true];
+                }
+
+                $json = $response->json();
+                
+                if (isset($json['code']) && $json['code'] !== 0) {
+                    return ['error' => 'Profil diprivat atau tidak ditemukan', 'is_private' => true];
+                }
+
+                $userInfo = $json['data']['user'] ?? [];
+                $stats = $json['data']['stats'] ?? [];
+
+                return [
+                    'display_name' => $userInfo['nickname'] ?? ('@' . $cleanUsername),
+                    'followers' => isset($stats['followerCount']) ? $this->formatNumber($stats['followerCount']) : '-',
+                    'following' => isset($stats['followingCount']) ? $this->formatNumber($stats['followingCount']) : '-',
+                    'likes' => isset($stats['heartCount']) ? $this->formatNumber($stats['heartCount']) : '-',
+                    'is_private' => false,
+                ];
+            } catch (\Exception $e) {
+                return ['error' => 'Terjadi kesalahan sistem', 'is_private' => true];
+            }
+        });
+
+        if (isset($data['error'])) {
+            return response()->json($data, 404);
+        }
+        
+        return response()->json($data);
+    }
+
+    private function formatNumber($num) 
+    {
+        if ($num >= 1000000) return round($num / 1000000, 1) . 'M';
+        if ($num >= 1000) return round($num / 1000, 1) . 'K';
+        return number_format($num);
+    }
 }

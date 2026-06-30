@@ -25,7 +25,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased overflow-x-hidden" x-data="{ sidebarOpen: false }">
     
-    <div class="flex h-screen overflow-hidden">
+    <div class="flex h-screen overflow-clip">
         
         <!-- Sidebar -->
         @include('admin-panel.layout.sidebar')
